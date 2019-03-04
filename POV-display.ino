@@ -57,8 +57,9 @@ int toprint[9]={17,14,21,36,36,36,36,36,36};
 //{1,1,1,1,0,0,0,1, 1,0,0,1,1,0,0,1, 1,0,0,1,1,0,0,1, 1,0,0,1,1,0,0,1, 1,1,1,1,1,1,1,1, 0,0,0,0,0,0,0,0}      //9
 //}
 #define BTW_BLADES 73000
-int max_dig=9;
-int dottime = 4000;    
+#define fontsize 2000
+int max_dig=15;
+int dottime = 2000;    
 int sensor = 13;
 int State = 0;         
 int lastState = 0; 
@@ -106,7 +107,7 @@ if(tempcount>=max_dig){tempcount=0;}
   if (State == HIGH){
   previous_micros1=micros();
   T=(previous_micros1-previous_micros4)/3.0;
- // dottime=73000.0/T *2000;
+  dottime=73000.0/T *fontsize;
 //toprint[8] = T %10; 
 //toprint[7] = (T / 10) % 10;
 //toprint[6] = (T / 100) % 10;
