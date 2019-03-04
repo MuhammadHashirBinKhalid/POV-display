@@ -1,3 +1,5 @@
+ /*Updated.. Try this.. Updated at 11.25am 21/2/2019.. Make video from same angle.. The ending symbol is $    */
+
 bool alpha[37][48]={
 {1,1,1,1,1,1,1,1, 1,0,0,0,0,0,0,1, 1,0,0,0,0,0,0,1, 1,0,0,0,0,0,0,1, 1,1,1,1,1,1,1,1, 0,0,0,0,0,0,0,0},     //0
 {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1, 0,0,0,0,0,0,0,0},     //1
@@ -40,7 +42,7 @@ bool alpha[37][48]={
 {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0}    //Empty = 36
 };
 
-int toprint[9]={17,14,21,21,24,36,36,36,36};
+int toprint[9]={17,14,21,36,36,36,36,36,36};
 
 //bool n[10][48]={
 //{1,1,1,1,1,1,1,1, 1,0,0,0,0,0,0,1, 1,0,0,0,0,0,0,1, 1,0,0,0,0,0,0,1, 1,1,1,1,1,1,1,1, 0,0,0,0,0,0,0,0},     //0
@@ -55,6 +57,7 @@ int toprint[9]={17,14,21,21,24,36,36,36,36};
 //{1,1,1,1,0,0,0,1, 1,0,0,1,1,0,0,1, 1,0,0,1,1,0,0,1, 1,0,0,1,1,0,0,1, 1,1,1,1,1,1,1,1, 0,0,0,0,0,0,0,0}      //9
 //}
 #define BTW_BLADES 73000
+int max_dig=9;
 int dottime = 4000;    
 int sensor = 13;
 int State = 0;         
@@ -66,6 +69,7 @@ int m1=0,m2=0,m3=0;
 bool b1init=0,b2init=0,b3init=0;
 
 void setup() {
+//max_dig=(4000/dottime) *9;
   Serial1.begin(9600);
   for (int Pin = 30; Pin <=37; Pin++) {
     pinMode(Pin, OUTPUT);}
@@ -82,29 +86,27 @@ void setup() {
 int i1=0,i2=0,i3=0;
 unsigned long T;
 int tempcount=0;
-int tempvalue=0,tempdisp=36;
+int tempvalue=0;
 void loop() {
 //  State = digitalRead(sensor);
 //if (State != lastState){
-if((Serial1.available()>0)&&(tempcount<9)){
-while((Serial1.available()>0)&&(tempcount<9)){
+if((Serial1.available()>0)&&(tempcount<max_dig)){
   tempvalue=int(Serial1.read());
-  if(tempvalue>64){tempdisp=tempvalue-65+10;}
-  else if(tempvalue>47){ tempdisp=tempvalue-48;}
-  else if(tempvalue==32){tempdisp=36;}
-  if (tempvalue==36){ 
-    for(;tempcount<9;tempcount++){ toprint[tempcount]=36;}
-  tempcount=0;
-  break;
+  if(tempvalue>64){tempvalue=tempvalue-65+10;}
+  else if(tempvalue>47){ tempvalue=tempvalue-48;}
+  else if (tempvalue==36){ 
+    for(;tempcount<max_dig;tempcount++){ toprint[tempcount]=36;}
   } 
-  else{ 
-if((tempdisp!=10)&&(tempdisp!=13))    toprint[tempcount]=tempdisp;
+  else if(tempvalue==32){tempvalue=36;}
+  if(tempcount<max_dig){ 
+    toprint[tempcount]=tempvalue;
   tempcount++;}
-  }}
-//  if(tempcount>=9){tempcount=0;}
+  }
+if(tempcount>=max_dig){tempcount=0;}
   if (State == HIGH){
   previous_micros1=micros();
   T=(previous_micros1-previous_micros4)/3.0;
+ // dottime=73000.0/T *2000;
 //toprint[8] = T %10; 
 //toprint[7] = (T / 10) % 10;
 //toprint[6] = (T / 100) % 10;
