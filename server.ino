@@ -5,9 +5,9 @@ void povserver(){
     }
 // Wait until the client sends some data
   Serial.println("new client");
-  while (!client.available()) {
-    delay(1);
-  }
+  //while (!client.available()) {
+    //delay(1);
+  //}
 
   // Read the first line of the request
   String command1 = client.readStringUntil('/');
@@ -31,7 +31,7 @@ if((value1.length()>0)&&(tempcount<max_dig)){
   else if (tempvalue==36){ 
     for(;tempcount<max_dig;tempcount++){ toprint[tempcount]=36;}
   } 
-  else if(tempvalue==32){tempvalue=36;}
+  else if(tempvalue==32){tempvalue=36; }
   if(tempcount<max_dig){ 
     toprint[tempcount]=tempvalue;
     Serial.print(toprint[tempcount]);
@@ -44,6 +44,12 @@ if(tempcount>=max_dig){tempcount=0;}
     value.toCharArray(charBuf, 70) ;
       fontsize=value.toInt();
     Serial.println(fontsize);
+   String value3 = client.readStringUntil('/');
+    Serial.println(value3);
+    if(value3=="YES"){
+     // ntptime();
+    }
+    
     }
   else {  // Prepare the response
     String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";

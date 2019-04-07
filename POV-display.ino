@@ -1,27 +1,27 @@
-#include <ESP8266WiFi.h>
-#include "textdisplay.h"
+#include <WiFi.h>
+#include "textdisplay1.h"
 #include <FastLED.h>
 #define NUM_LEDS 8
-#define DATA_PIN D1 //for blade1
-#define CLOCK_PIN D2 //for blade1
-#define DATA_PIN1 D5 //for blade2
-#define CLOCK_PIN1 D6 //for blade2
-#define DATA_PIN2 D3 //for blade3 
-#define CLOCK_PIN2 D8 //for blade3
-//#define color 
+#define DATA_PIN 0
+#define CLOCK_PIN 2
+#define DATA_PIN1 4
+#define CLOCK_PIN1 5
+#define DATA_PIN2 12
+#define CLOCK_PIN2 13 
 CRGB leds1[NUM_LEDS];
 CRGB leds2[NUM_LEDS];
 CRGB leds3[NUM_LEDS];
-const char* ssid = "VPN IC";
-const char* password = "abcd1234";
-String value;   //string for fontsize
+const char* ssid = "TP-LINK_20DEDE";
+const char* password = "imtiazalam";
+String value; //for font size
+String value2; // for feild 1
+char charBuff[60];//for time
 char charBuf[60];
-String value1; //string for text
+String value1; //for text
 // Create an instance of the server
 // specify the port to listen on as an argument
 WiFiServer server(80);
-
-bool alpha[37][48] = {
+bool alpha[38][48] = {
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //0
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //1
   {1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //2
@@ -32,6 +32,7 @@ bool alpha[37][48] = {
   {1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //7
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //8
   {1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //9
+
 
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //A=10
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //B=11
@@ -60,7 +61,8 @@ bool alpha[37][48] = {
   {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //Y=34
   {1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //Z=35
 
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} //Empty = 36
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},//Empty = 36
+  {0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}//:=37
 };
 
 int toprint[22] = {17, 14, 21, 21, 24, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36};
@@ -70,7 +72,7 @@ int fontsize = 2000;
 int max_dig = 23;
 int dottime;
 int ivalue = 0;
-int sensor = D7;
+int sensor = 16 ;
 int State = 0;
 int lastState = 0;
 bool mybool = 0;
@@ -101,22 +103,20 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi connected");
   // Start the server
-  server.begin();
+ 
   Serial.println("Server started");
 
   // Print the IP address
   Serial.println(WiFi.localIP());
 }
-
 int i1 = 0, i2 = 0, i3 = 0;
 unsigned long T;
 int tempcount = 0;
 int tempvalue=0;
 void loop() {
   // Check if a client has connected
- 
+
  povserver();
-  
    if (State == HIGH) {
     previous_micros1 = micros();
     T = (previous_micros1 - previous_micros4) / 3.0;
@@ -220,14 +220,6 @@ void printLetterb3(bool letter[])
 
 
 // Install Pin change interrupt for a pin, can be called multiple times
-
-/*void pciSetup(byte pin)
-  {
-     digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
-    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
-    PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
-  }
-*/
 // Use one Routine to handle each group
 
 void ISR () // handle pin change interrupt for D0 to D7 here
