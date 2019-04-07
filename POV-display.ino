@@ -1,4 +1,10 @@
+
 #include <WiFi.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+
+/*Updated.. You may try this.. Updated at 10.27 pm 21/2/2019.. Make video from same angle.. The ending symbol is $    */
+
 #include "textdisplay1.h"
 #include <FastLED.h>
 #define NUM_LEDS 8
@@ -7,20 +13,32 @@
 #define DATA_PIN1 4
 #define CLOCK_PIN1 5
 #define DATA_PIN2 12
-#define CLOCK_PIN2 13 
+#define CLOCK_PIN2 13
+
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
+
+// Variables to save date and time
+String formattedDate;
+String dayStamp;
+String timeStamp;
+
+//#define color 
 CRGB leds1[NUM_LEDS];
 CRGB leds2[NUM_LEDS];
 CRGB leds3[NUM_LEDS];
 const char* ssid = "TP-LINK_20DEDE";
 const char* password = "imtiazalam";
-String value; //for font size
-String value2; // for feild 1
+String value; //for fontsize
+String value2; //for feild1
 char charBuff[60];//for time
-char charBuf[60];
+char charBuf[60]; //for text
 String value1; //for text
 // Create an instance of the server
 // specify the port to listen on as an argument
 WiFiServer server(80);
+
 bool alpha[38][48] = {
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //0
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0}, //1
@@ -70,7 +88,7 @@ int toprint[22] = {17, 14, 21, 21, 24, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 3
 //#define BTW_BLADES 73000
 int fontsize = 2000;
 int max_dig = 23;
-int dottime;
+int dottime=1000;
 int ivalue = 0;
 int sensor = 16 ;
 int State = 0;
@@ -108,7 +126,17 @@ void setup() {
 
   // Print the IP address
   Serial.println(WiFi.localIP());
+ server.begin();
+  // Initialize a NTPClient to get time
+  timeClient.begin();
+  // Set offset time in seconds to adjust for your timezone, for example:
+  // GMT +1 = 3600
+  // GMT +8 = 28800
+  // GMT -1 = -3600
+  // GMT 0 = 0
+  timeClient.setTimeOffset(3600);
 }
+void ntptime();
 int i1 = 0, i2 = 0, i3 = 0;
 unsigned long T;
 int tempcount = 0;
@@ -117,10 +145,11 @@ void loop() {
   // Check if a client has connected
 
  povserver();
+  ntptime();
    if (State == HIGH) {
     previous_micros1 = micros();
     T = (previous_micros1 - previous_micros4) / 3.0;
-    dottime = T / 73000.0 * fontsize;
+   // dottime = T / 73000.0 * fontsize;
     
     previous_micros4 = micros();
     m1 = 0;
@@ -174,6 +203,7 @@ void loop() {
     previous_micros3 = micros();
   }
   lastState = State;
+ //ntptime();
 }
 
 void printLetterb1(bool letter[])
@@ -220,6 +250,8 @@ void printLetterb3(bool letter[])
 
 
 // Install Pin change interrupt for a pin, can be called multiple times
+
+
 // Use one Routine to handle each group
 
 void ISR () // handle pin change interrupt for D0 to D7 here
